@@ -1,0 +1,10 @@
+name: Update MSVC toolchain on Windows
+
+runs:
+  using: composite
+
+  steps:
+    - run: |
+        dotnet tool update -g dotnet-vs;
+        vs update all;
+      shell: pwsh
