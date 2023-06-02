@@ -17,12 +17,6 @@
 
 <br/>
 
-### Installing
-
-(Install guideline)
-
-<br/>
-
 ### Building the project
 
 Use cmake to build the project, checkout [github workflow file](.github/workflows/build.yml) for details.

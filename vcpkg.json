@@ -4,7 +4,8 @@
   "dependencies": [
     "ms-gsl",
     "stdsharp",
-    "catch2"
+    "catch2",
+    "glm"
   ],
   "overrides": [],
   "vcpkg-configuration": {
@@ -12,7 +13,7 @@
       {
         "kind": "git",
         "repository": "https://github.com/BlurringShadow/vcpkg-registry.git",
-        "baseline": "168afd71bb31a4126aaba41368b30afe35fd2210",
+        "baseline": "01e8543c9cd219cdb0cfbe4be55fae2f71db8933",
         "packages": [
           "stdsharp"
         ]

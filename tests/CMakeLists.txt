@@ -11,26 +11,27 @@ include(Catch)
 #
 # Set the sources for the unit tests and add the executable(s)
 #
-set(src src/test.cpp)
+set(src src/bresenham_draw_line_test.cpp)
 
 config_lib(${PROJECT_NAME}Lib INTERFACE)
 
-target_link_libraries(
-  ${PROJECT_NAME}Lib INTERFACE ${CMAKE_PROJECT_NAME} stdsharp::stdsharp
-                               Catch2::Catch2WithMain)
+target_link_libraries(${PROJECT_NAME}Lib INTERFACE ${CMAKE_PROJECT_NAME}
+                                                   Catch2::Catch2WithMain)
+
+set_target_properties(${PROJECT_NAME}Lib PROPERTIES COMPILE_WARNING_AS_ERROR ON)
+
+target_compile_options(
+  ${PROJECT_NAME}Lib
+  INTERFACE $<$<CXX_COMPILER_ID:MSVC>:/W4>
+            $<$<CXX_COMPILER_ID:Clang>:-ftemplate-backtrace-limit=0
+            -ftime-trace -fdiagnostics-show-template-tree>)
 
 config_exe(${PROJECT_NAME} EXE_SRC ${src})
 
-target_compile_options(
-  ${PROJECT_NAME}
-  PUBLIC $<$<CXX_COMPILER_ID:MSVC>:/W4>
-         $<$<CXX_COMPILER_ID:Clang>:-ftemplate-backtrace-limit=0 -ftime-trace
-         -fdiagnostics-show-template-tree>)
 target_enable_clang_sanitizer(${PROJECT_NAME} PUBLIC SANITIZER address
                               undefined)
-target_link_libraries(${PROJECT_NAME} PRIVATE ${PROJECT_NAME}Lib)
 
-set_target_properties(${PROJECT_NAME} PROPERTIES COMPILE_WARNING_AS_ERROR ON)
+target_link_libraries(${PROJECT_NAME} PRIVATE ${PROJECT_NAME}Lib)
 
 #
 # Configure clang-tidy
