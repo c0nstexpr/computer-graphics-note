@@ -45,7 +45,7 @@ namespace graphics
     }
 
     template<
-        typename T,
+        typename T = int,
         glm::qualifier Qualifier = glm::qualifier::defaultp,
         std::output_iterator<glm::vec<2, T, Qualifier>> OutIt // clang-format off
     > // clang-format on

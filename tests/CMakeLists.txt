@@ -11,7 +11,7 @@ include(Catch)
 #
 # Set the sources for the unit tests and add the executable(s)
 #
-set(src src/bresenham_draw_line_test.cpp)
+set(src src/bresenham_draw_line_test.cpp src/cohen_sutherland_clipping_test.cpp)
 
 config_lib(${PROJECT_NAME}Lib INTERFACE)
 
