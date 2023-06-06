@@ -1,8 +1,6 @@
 #pragma once
 
 #include <algorithm>
-#include <glm/fwd.hpp>
-#include <optional>
 
 #include <stdsharp/cassert/cassert.h>
 
@@ -34,18 +32,11 @@ namespace graphics
         }
     }
 
-    template<glm::qualifier Qualifier = glm::qualifier::defaultp>
-    struct cohen_sutherland_clipped_t
-    {
-        glm::vec<2, double, Qualifier> p0;
-        glm::vec<2, double, Qualifier> p1;
-    };
-
     template<typename T = int, glm::qualifier Qualifier = glm::qualifier::defaultp>
         requires std::is_signed_v<T>
-    constexpr cohen_sutherland_clipped_t<Qualifier> cohen_sutherland_clipping(
+    constexpr auto cohen_sutherland_clipping(
         const glm::vec<2, T, Qualifier> p0,
-        const glm::vec<2, T, Qualifier> p1,
+        const glm::vec<2, std::type_identity_t<T>, Qualifier> p1,
         const glm::vec<2, double, Qualifier> win_min,
         const glm::vec<2, double, Qualifier> win_max
     )
@@ -55,20 +46,42 @@ namespace graphics
             "incorrect points input, min should be strictly less than max"
         );
 
+        struct clipped_t
+        {
+            glm::vec<2, double, Qualifier> p0;
+            glm::vec<2, double, Qualifier> p1;
+        };
+
         const auto line_a = p1.y - p0.y;
         const auto line_b = p0.x - p1.x;
 
-        if(line_a == 0) return {{win_min.x, p0.y}, {win_max.x, p1.y}};
-        if(line_b == 0) return {{p0.x, win_min.y}, {p1.x, win_max.y}};
+        if(line_a == 0)
+        {
+            const auto [min_x, max_x] = std::minmax(p0.x, p1.x);
+            return clipped_t{
+                {std::max(win_min.x, static_cast<double>(min_x)), p0.y},
+                {std::min(win_max.x, static_cast<double>(max_x)), p0.y} //
+            };
+        }
+        if(line_b == 0)
+        {
+            const auto [min_y, max_y] = std::minmax(p0.y, p0.y);
+            return clipped_t{
+                {p0.x, std::max(win_min.y, static_cast<double>(min_y))},
+                {p0.x, std::min(win_max.y, static_cast<double>(max_y))} //
+            };
+        }
 
-        cohen_sutherland_clipped_t<Qualifier> clipped = {p0, p1};
+        clipped_t clipped{p0, p1};
 
         glm::bvec4 outcode0{
             greaterThanEqual(clipped.p0, win_min),
-            lessThanEqual(clipped.p0, win_max)};
+            lessThanEqual(clipped.p0, win_max) //
+        };
         glm::bvec4 outcode1{
             greaterThanEqual(clipped.p1, win_min),
-            lessThanEqual(clipped.p1, win_max)};
+            lessThanEqual(clipped.p1, win_max) //
+        };
 
         // reject the line when both on the same side of window
         {
@@ -79,7 +92,7 @@ namespace graphics
                 {
                     constexpr auto nan = std::numeric_limits<double>::quiet_NaN();
                     constexpr glm::vec<2, double, Qualifier> nan_vec{nan, nan};
-                    return {nan_vec, nan_vec};
+                    return clipped_t{nan_vec, nan_vec};
                 }
         }
 
@@ -107,7 +120,6 @@ namespace graphics
                 in_win1
             );
         }
-
 
         return clipped;
     }

@@ -17,7 +17,7 @@ namespace graphics
         constexpr OutIt bresenham_draw_line(
             glm::vec<2, T, Qualifier>& p0,
             std::make_unsigned_t<T>& d,
-            const glm::vec<2, T, Qualifier> diff,
+            const glm::vec<2, ::std::type_identity_t<T>, Qualifier> diff,
             OutIt out_it
         )
         {
