@@ -1,14 +1,14 @@
 #include <glm/gtc/epsilon.hpp>
 
 #include "test.h"
-#include "graphics/midpoint_clipping.h"
+#include "graphics/liang_barsky_clipping.h"
 
 using namespace std;
 using namespace stdsharp;
 using namespace glm;
 using namespace graphics;
 
-SCENARIO("midpoint clip test", "[midpoint_clipping]")
+SCENARIO("liang-barsky clip test", "[liang_barsky_clipping]")
 {
     struct points
     {
@@ -27,7 +27,7 @@ SCENARIO("midpoint clip test", "[midpoint_clipping]")
         points{{-5, 5}, {5, 3}, {0, 4}, {5, 3}}
     );
 
-    const auto [p0, p1] = midpoint_clipping(in_p0, in_p1, {}, {10, 10});
+    const auto [p0, p1] = liang_barsky_clipping(in_p0, in_p1, {}, {10, 10});
 
     constexpr auto error = 0.001;
 
