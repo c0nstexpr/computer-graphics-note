@@ -79,7 +79,7 @@ namespace graphics
             return clipped_t{{std::numeric_limits<double>::quiet_NaN(), 0}};
 
         // find the intersections
-        glm::vec<2, double, Qualifier> mid_p;
+        glm::vec<2, double, Qualifier> mid_p{};
 
         // cut the line until the mid point is inside the window
         while(true)

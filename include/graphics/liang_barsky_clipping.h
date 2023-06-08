@@ -109,7 +109,7 @@ namespace graphics
             glm::vec<2, double, Qualifier> p1;
         };
 
-        clipped_t ret;
+        clipped_t ret{};
         const auto invalid_v = win_min.x - 1;
         const auto dx = p1.x - p0.x;
         const auto dy = p1.y - p0.y;
