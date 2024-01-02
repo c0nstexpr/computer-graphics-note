@@ -1,5 +1,3 @@
-#include <catch2/matchers/catch_matchers_range_equals.hpp>
-
 #include "test.h"
 #include "graphics/bresenham_draw_line.h"
 
@@ -70,5 +68,11 @@ SCENARIO("draw test", "[bresenham_draw_line]")
         }
     );
 
-    bresenham_draw_line(args.p0, args.p1, catch_require_iterator{args.out.cbegin()}, args.dx);
+    bresenham_draw_line(
+        args.p0,
+        args.p1,
+        catch_require_iterator{args.out.cbegin()},
+        args.dx,
+        args.dx
+    );
 }

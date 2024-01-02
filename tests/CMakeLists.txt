@@ -24,8 +24,8 @@ set_target_properties(${PROJECT_NAME}Lib PROPERTIES COMPILE_WARNING_AS_ERROR ON)
 target_compile_options(
   ${PROJECT_NAME}Lib
   INTERFACE $<$<CXX_COMPILER_ID:MSVC>:/W4>
-            $<$<CXX_COMPILER_ID:Clang>:-ftemplate-backtrace-limit=0
-            -ftime-trace -fdiagnostics-show-template-tree>)
+            $<$<CXX_COMPILER_ID:Clang>:-Qunused-arguments -ftime-trace
+            -fdiagnostics-show-template-tree>)
 
 config_exe(${PROJECT_NAME} EXE_SRC ${src})
 

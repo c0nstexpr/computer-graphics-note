@@ -41,10 +41,7 @@ namespace graphics
         const glm::vec<2, double, Qualifier> win_max
     )
     {
-        star::precondition<std::invalid_argument>(
-            [=] { return all(lessThanEqual(win_min, win_max)); },
-            "incorrect points input, min should be strictly less than max"
-        );
+        Expects(all(lessThanEqual(win_min, win_max)));
 
         struct clipped_t
         {
