@@ -4,9 +4,9 @@
 
 #include <stdsharp/cassert/cassert.h>
 
-#include "namespace_alias.h"
+#include "../namespace_alias.h"
 
-namespace graphics
+namespace graphics::rasterization
 {
     namespace details
     {

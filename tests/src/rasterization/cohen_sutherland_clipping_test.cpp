@@ -1,12 +1,12 @@
 #include <glm/gtc/epsilon.hpp>
 
 #include "test.h"
-#include "graphics/cohen_sutherland_clipping.h"
+#include "graphics/rasterization/cohen_sutherland_clipping.h"
 
 using namespace std;
 using namespace stdsharp;
 using namespace glm;
-using namespace graphics;
+using namespace graphics::rasterization;
 
 SCENARIO("cohen-sutherland clip test", "[cohen_sutherland_clipping]")
 {

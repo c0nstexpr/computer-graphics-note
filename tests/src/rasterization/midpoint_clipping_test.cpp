@@ -1,12 +1,12 @@
 #include <glm/gtc/epsilon.hpp>
 
 #include "test.h"
-#include "graphics/midpoint_clipping.h"
+#include "graphics/rasterization/midpoint_clipping.h"
 
 using namespace std;
 using namespace stdsharp;
 using namespace glm;
-using namespace graphics;
+using namespace graphics::rasterization;
 
 SCENARIO("midpoint clip test", "[midpoint_clipping]")
 {

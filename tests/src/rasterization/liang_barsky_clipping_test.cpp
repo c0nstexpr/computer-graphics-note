@@ -1,12 +1,12 @@
 #include <glm/gtc/epsilon.hpp>
 
 #include "test.h"
-#include "graphics/liang_barsky_clipping.h"
+#include "graphics/rasterization/liang_barsky_clipping.h"
 
 using namespace std;
 using namespace stdsharp;
 using namespace glm;
-using namespace graphics;
+using namespace graphics::rasterization;
 
 SCENARIO("liang-barsky clip test", "[liang_barsky_clipping]")
 {

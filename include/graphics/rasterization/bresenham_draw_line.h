@@ -5,9 +5,9 @@
 
 #include <stdsharp/cassert/cassert.h>
 
-#include "namespace_alias.h"
+#include "../namespace_alias.h"
 
-namespace graphics
+namespace graphics::rasterization
 {
     inline constexpr struct bresenham_draw_line_fn
     {
@@ -53,30 +53,25 @@ namespace graphics
             // a = diff.y;
             // b = -diff.x;
             // delta_c = a * dx + b * dy
-            const auto c_dx = diff.y * dx;
+            const auto c2_dx = 2 * diff.y * dx;
             const auto c_dy = -diff.x * dy;
-            const auto half_c_dy = c_dy / 2;
+            const auto c2_dy = 2 * c_dy;
+            const auto c_cmp = c2_dx <=> 0;
 
             // a * (x + dx) + b * y
-            for(T c = 0; is_followed(p1.x <=> p0.x, x_diff_cmp); p0.x += dx, c += c_dx)
-            {
+            for(T c2 = 0; is_followed(p1.x <=> p0.x, x_diff_cmp); p0.x += dx, c2 += c2_dx)
                 // current_c = a * (x + dx * i) + b * (y + dy * j)
                 // c - current_c = b * dy * k
-                const auto c_cmp = c <=> 0;
-                if(const auto next_c = c + c_dy;is_followed(next_c <=> 0, c_cmp))
-                {
-                    for(; is_followed(next_c <=> 0, c_cmp); next_c += c_dy)
+                if(is_followed(c2 + c_dy <=> 0, c_cmp)) do // NOLINT(*-do-while)
                     {
-                        *(out_it++) = p0;
                         p0.y += dy;
-
                         if(!is_followed(p1.y <=> p0.y, y_diff_cmp)) return;
-                    }
 
-                    c = next_c;
-                }
+                        *(out_it++) = p0;
+
+                        c2 += c2_dy;
+                    } while(is_followed(c2 + c_dy <=> 0, c_cmp));
                 else *(out_it++) = p0;
-            }
         }
     } bresenham_draw_line{};
 }
