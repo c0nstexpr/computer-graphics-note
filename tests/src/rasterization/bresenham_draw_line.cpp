@@ -30,7 +30,10 @@ void validate_fn(
     const auto half_dy = dy / 2.0;
 
     if(diff.x == 0)
-        for(auto y = p0.y; is_followed(p1.y <=> y, y_diff_cmp); y += dx) *(it++) = ivec2{p0.x, y};
+    {
+        for(auto y = p0.y; is_followed(p1.y <=> y, y_diff_cmp); y += dy) *(it++) = ivec2{p0.x, y};
+        return;
+    }
 
     for(auto x = p0.x, y = p0.y; is_followed(p1.x <=> x, x_diff_cmp); x += dx)
     {
@@ -53,26 +56,21 @@ void validate_fn(
 
 SCENARIO("draw line", "[bresenham_draw_line]")
 {
-    auto& mt_engine = get_mt_engine();
-    std::uniform_int_distribution<> dist(-1000, 1000);
-    vector<ivec2> validate_vec;
-    vector<ivec2> out;
+    const ivec2 p0 = GENERATE(take(10, Catch::random_glm_vec<2>(-5, 5)));
+    const ivec2 p1 = GENERATE(take(1, Catch::random_glm_vec<2>(-5, 5)));
+    auto dx = GENERATE(take(1, random(-5, 5)));
+    auto dy = GENERATE(take(1, random(-5, 5)));
 
-    for(auto i = 0; i < 100; ++i)
+    if(!is_followed(dx <=> 0, p1.x - p0.x <=> 0)) dx *= -1;
+    if(!is_followed(dy <=> 0, p1.y - p0.y <=> 0)) dy *= -1;
+
+    GIVEN(format("line p0 = {}, p1 = {}, dx = {}, dy = {}", p0, p1, dx, dy))
+    WHEN("draw it")
     {
-        ivec2 p0{dist(mt_engine), dist(mt_engine)};
-        ivec2 p1{dist(mt_engine), dist(mt_engine)};
-        auto dx = dist(mt_engine);
-        auto dy = dist(mt_engine);
+        vector<ivec2> out1, out2;
+        validate_fn(p0, p1, back_inserter(out1), dx, dy);
+        bresenham_draw_line(p0, p1, back_inserter(out2), dx, dy);
 
-        if(!is_followed(dx <=> 0, p1.x - p0.x <=> 0)) dx *= -1;
-        if(!is_followed(dy <=> 0, p1.y - p0.y <=> 0)) dy *= -1;
-
-        validate_vec.clear();
-        out.clear();
-        bresenham_draw_line(p0, p1, back_inserter(out), dx, dy);
-        validate_fn(p0, p1, back_inserter(validate_vec), dx, dy);
-
-        REQUIRE_THAT(validate_vec, Catch::Matchers::RangeEquals(out));
+        REQUIRE_THAT(out1, Catch::Matchers::RangeEquals(out2));
     }
 }

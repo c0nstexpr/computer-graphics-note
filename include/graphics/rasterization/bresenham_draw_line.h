@@ -32,8 +32,8 @@ namespace graphics::rasterization
             const auto x_diff_cmp = diff.x <=> 0;
             const auto y_diff_cmp = diff.y <=> 0;
 
-            Expects(is_followed(dx <=> 0, x_diff_cmp));
-            Expects(is_followed(dy <=> 0, y_diff_cmp));
+            Expects(is_eq(x_diff_cmp) || is_followed(dx <=> 0, x_diff_cmp));
+            Expects(is_eq(y_diff_cmp) || is_followed(dy <=> 0, y_diff_cmp));
 
             if(dx == 0) dx = diff.x > 0 ? 1 : -1;
             if(dy == 0) dy = diff.y > 0 ? 1 : -1;

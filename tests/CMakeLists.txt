@@ -13,10 +13,11 @@ include(Catch)
 #
 set(src
     src/test.cpp
-    src/rasterization/bresenham_draw_line_test.cpp
-    src/rasterization/cohen_sutherland_clipping_test.cpp
-    src/rasterization/midpoint_clipping_test.cpp
-    src/rasterization/liang_barsky_clipping_test.cpp)
+    src/rasterization/bresenham_draw_line.cpp
+    src/rasterization/cohen_sutherland_clipping.cpp
+    src/rasterization/midpoint_clipping.cpp
+    src/rasterization/liang_barsky_clipping.cpp
+    src/rasterization/raster_triangle.cpp)
 
 config_lib(${PROJECT_NAME}Lib INTERFACE)
 
