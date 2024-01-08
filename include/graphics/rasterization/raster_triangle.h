@@ -25,17 +25,17 @@ namespace graphics::rasterization
             // f0(x, y) => (y0 - y1)x + (x1 - x0)y + x0y1 - x1y0
             const auto f0_a = p0.y - p1.y; // y0 - y1
             const auto f0_b = p1.x - p0.x; // x1 - x0
-            const auto f0_c = p0.x * p1.y - p1.x * p0.y; // x0y1 - x1y0
+            const auto f0_c = -f0_a * p0.x - f0_b * p0.y;
 
             // f1(x, y) => (y1 - y2)x + (x2 - x1)y + x1y2 - x2y1
             const auto f1_a = p1.y - p2.y; // y1 - y2
             const auto f1_b = p2.x - p1.x; // x2 - x1
-            const auto f1_c = p1.x * p2.y - p2.x * p1.y; // x1y2 - x2y1
+            const auto f1_c = -f1_a * p1.x - f1_b * p1.y;
 
             // f2(x, y) => (y2 - y0)x + (x0 - x2)y + x2y0 - x0y2
             const auto f2_a = p2.y - p0.y; // y2 - y0
             const auto f2_b = p0.x - p2.x; // x0 - x2
-            const auto f2_c = p2.x * p0.y - p0.x * p2.y; // x2y0 - x0y2
+            const auto f2_c = -f2_a * p2.x - f2_b * p2.y;
 
             const OutT f0_x2y2 = auto_cast(f0_a * p2.x + f0_b * p2.y + f0_c);
             const OutT f1_x0y0 = auto_cast(f1_a * p0.x + f1_b * p0.y + f1_c);
@@ -79,17 +79,17 @@ namespace graphics::rasterization
             // f0(x, y) => (y0 - y1)x + (x1 - x0)y + x0y1 - x1y0
             const auto f0_a = p0.y - p1.y; // y0 - y1
             const auto f0_b = p1.x - p0.x; // x1 - x0
-            const auto f0_c = p0.x * p1.y - p1.x * p0.y; // x0y1 - x1y0
+            const auto f0_c = -f0_a * p0.x - f0_b * p0.y;
 
             // f1(x, y) => (y1 - y2)x + (x2 - x1)y + x1y2 - x2y1
             const auto f1_a = p1.y - p2.y; // y1 - y2
             const auto f1_b = p2.x - p1.x; // x2 - x1
-            const auto f1_c = p1.x * p2.y - p2.x * p1.y; // x1y2 - x2y1
+            const auto f1_c = -f1_a * p1.x - f1_b * p1.y;
 
             // f2(x, y) => (y2 - y0)x + (x0 - x2)y + x2y0 - x0y2
             const auto f2_a = p2.y - p0.y; // y2 - y0
             const auto f2_b = p0.x - p2.x; // x0 - x2
-            const auto f2_c = p2.x * p0.y - p0.x * p2.y; // x2y0 - x0y2
+            const auto f2_c = -f2_a * p2.x - f2_b * p2.y;
 
             const OutT f0_x2y2 = auto_cast(f0_a * p2.x + f0_b * p2.y + f0_c);
             const OutT f1_x0y0 = auto_cast(f1_a * p0.x + f1_b * p0.y + f1_c);

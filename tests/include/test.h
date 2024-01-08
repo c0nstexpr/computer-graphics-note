@@ -47,7 +47,7 @@ std::mt19937_64& get_mt_engine();
 namespace Catch
 {
     template<glm::length_t L, typename T, glm::qualifier Q = glm::defaultp>
-    class random_glm_vec_generator final: public Generators::IGenerator<glm::vec<L, T, Q>>
+    class random_glm_vec_generator final : public Generators::IGenerator<glm::vec<L, T, Q>>
     {
         using dist_t = std::conditional_t<
             std::floating_point<T>,
@@ -60,7 +60,7 @@ namespace Catch
         type current_{};
 
     public:
-        random_glm_vec_generator(const T low, const int high): m_dist(low, high) { next(); }
+        random_glm_vec_generator(const T low, const T high): m_dist(low, high) { next(); }
 
         const type& get() const override { return current_; }
 
