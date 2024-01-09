@@ -47,9 +47,9 @@ namespace graphics::rasterization
             for(auto y = py.min; y <= py.max; ++y)
                 for(auto x = px.min; x <= px.max; ++x)
                 {
-                    const T a = (f1_a * x + f1_b * y + f1_c) / f1_x0y0;
-                    const T b = (f2_a * x + f2_b * y + f2_c) / f2_x1y1;
-                    const T c = (f0_a * x + f0_b * y + f0_c) / f0_x2y2;
+                    const auto a = (f1_a * x + f1_b * y + f1_c) / f1_x0y0;
+                    const auto b = (f2_a * x + f2_b * y + f2_c) / f2_x1y1;
+                    const auto c = (f0_a * x + f0_b * y + f0_c) / f0_x2y2;
 
                     if(a <= 0 || b <= 0 || c <= 0) continue;
 
@@ -108,9 +108,9 @@ namespace graphics::rasterization
             const auto f1_dy = (f1_b - f1_a * diff_x) / f2_x1y1;
             const auto f2_dy = (f2_b - f2_a * diff_x) / f0_x2y2;
 
-            auto f0_xy = f0_a * px.min + f0_b * py.min + f0_c;
-            auto f1_xy = f1_a * px.min + f1_b * py.min + f1_c;
-            auto f2_xy = f2_a * px.min + f2_b * py.min + f2_c;
+            OutT f0_xy = auto_cast(f0_a * px.min + f0_b * py.min + f0_c);
+            OutT f1_xy = auto_cast(f1_a * px.min + f1_b * py.min + f1_c);
+            OutT f2_xy = auto_cast(f2_a * px.min + f2_b * py.min + f2_c);
 
             for(auto y = py.min; y <= py.max; ++y, f0_xy += f0_dy, f1_xy += f1_dy, f2_xy += f2_dy)
             {
