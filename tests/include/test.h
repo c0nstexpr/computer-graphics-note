@@ -4,7 +4,11 @@
 #include <ranges>
 #include <random>
 
-#include <catch2/catch_all.hpp>
+#include <catch2/generators/catch_generators_all.hpp>
+#include <catch2/matchers/catch_matchers_all.hpp>
+#include <catch2/reporters/catch_reporters_all.hpp>
+#include <catch2/catch_test_macros.hpp>
+
 #include <glm/glm.hpp>
 
 namespace std
@@ -69,6 +73,6 @@ namespace Catch
     template<glm::length_t L, typename T, glm::qualifier Q = glm::defaultp>
     Generators::GeneratorWrapper<glm::vec<L, T, Q>> random_glm_vec(const T low, decltype(low) high)
     {
-        return new random_glm_vec_generator<L, T, Q>{low, high};
+        return new random_glm_vec_generator<L, T, Q>{low, high}; // NOLINT(*-owning-memory)
     }
 }

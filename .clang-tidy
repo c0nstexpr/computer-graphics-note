@@ -35,7 +35,8 @@ Checks: # enabled
     -*-rvalue-reference-param-not-moved,
     -*-include-cleaner,
     -*-swappable-parameters,
-    -*-reserved-identifier'
+    -*-reserved-identifier
+    -*-do-while'
   # disabled alias
   - '-bugprone-narrowing-conversions,
     -cert-con36-c,

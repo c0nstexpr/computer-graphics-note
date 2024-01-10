@@ -13,6 +13,7 @@ include(Catch)
 #
 set(src
     src/test.cpp
+    src/triangle.cpp
     src/rasterization/bresenham_draw_line.cpp
     src/rasterization/cohen_sutherland_clipping.cpp
     src/rasterization/midpoint_clipping.cpp
@@ -22,7 +23,7 @@ set(src
 config_lib(${PROJECT_NAME}Lib INTERFACE)
 
 target_link_libraries(${PROJECT_NAME}Lib INTERFACE ${CMAKE_PROJECT_NAME}
-                                                   Catch2::Catch2WithMain)
+                                                   Catch2::Catch2)
 
 set_target_properties(${PROJECT_NAME}Lib PROPERTIES COMPILE_WARNING_AS_ERROR ON)
 
@@ -37,7 +38,8 @@ config_exe(${PROJECT_NAME} EXE_SRC ${src})
 target_enable_clang_sanitizer(${PROJECT_NAME} PUBLIC SANITIZER address
                               undefined)
 
-target_link_libraries(${PROJECT_NAME} PRIVATE ${PROJECT_NAME}Lib)
+target_link_libraries(${PROJECT_NAME} PRIVATE ${PROJECT_NAME}Lib
+                                              Catch2::Catch2WithMain)
 
 #
 # Configure clang-tidy

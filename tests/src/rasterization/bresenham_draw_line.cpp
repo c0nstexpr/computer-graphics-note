@@ -67,7 +67,8 @@ SCENARIO("draw line", "[bresenham_draw_line]")
     GIVEN(format("line p0 = {}, p1 = {}, dx = {}, dy = {}", p0, p1, dx, dy))
     WHEN("draw it")
     {
-        vector<ivec2> out1, out2;
+        vector<ivec2> out1;
+        vector<ivec2> out2;
         validate_fn(p0, p1, back_inserter(out1), dx, dy);
         bresenham_draw_line(p0, p1, back_inserter(out2), dx, dy);
 

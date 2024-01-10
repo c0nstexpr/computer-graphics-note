@@ -4,7 +4,8 @@
   "dependencies": [
     "stdsharp",
     "catch2",
-    "glm"
+    "glm",
+    "benchmark"
   ],
   "overrides": [],
   "vcpkg-configuration": {

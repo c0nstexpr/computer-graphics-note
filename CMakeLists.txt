@@ -26,3 +26,5 @@ verbose_message("Successfully added all dependencies and linked against them.")
 
 include(CTest)
 add_subdirectory(tests)
+
+add_subdirectory(benchmark)
