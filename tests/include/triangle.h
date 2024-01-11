@@ -20,12 +20,12 @@ namespace Catch
         graphics::test::triangle current_{};
 
     public:
-        random_triangle_generator(int, int);
+        random_triangle_generator(int low, int high);
 
         const type& get() const override;
 
         bool next() override;
     };
 
-    Generators::GeneratorWrapper<graphics::test::triangle> random_triangle(int, int);
+    Generators::GeneratorWrapper<graphics::test::triangle> random_triangle(int low, int high);
 }

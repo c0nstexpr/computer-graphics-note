@@ -6,11 +6,9 @@ using namespace stdsharp;
 using namespace glm;
 using namespace graphics::rasterization;
 
-SCENARIO("raster triangle", "[raster_triangle]")
+SCENARIO("raster triangle", "[raster_triangle]") // NOLINT(*-cognitive-complexity)
 {
-    const auto [p0, p1, p2] = GENERATE(take(10, Catch::random_triangle(-5, 5)));
-
-    // const ivec2 p0{4, 3}, p1{2, 1}, p2{-2, 2};
+    const auto [p0, p1, p2] = GENERATE(take(100, Catch::random_triangle(-100, 100)));
 
     GIVEN(format("triangle p0 = {}, p1 = {}, p2 = {}", p0, p1, p2))
     WHEN("rasterize it")
@@ -24,20 +22,19 @@ SCENARIO("raster triangle", "[raster_triangle]")
         constexpr auto epsilon = 0.001f;
 
         trivial_raster_triangle<>(p0, p1, p2, back_inserter(out1), back_inserter(out_bcoor1));
-        fast_raster_triangle<>(p0, p1, p2, back_inserter(out2), back_inserter(out_bcoor2));
-        precise_raster_triangle<>(p0, p1, p2, back_inserter(out3), back_inserter(out_bcoor3));
+        floating_incremental_raster_triangle<>(p0, p1, p2, back_inserter(out2), back_inserter(out_bcoor2));
+        integral_incremental_raster_triangle<>(p0, p1, p2, back_inserter(out3), back_inserter(out_bcoor3));
 
         REQUIRE_THAT(out1, Catch::Matchers::RangeEquals(out2));
         REQUIRE_THAT(out1, Catch::Matchers::RangeEquals(out3));
+        REQUIRE_THAT(out_bcoor1, Catch::Matchers::RangeEquals(out_bcoor3));
 
         REQUIRE(out_bcoor1.size() == out_bcoor2.size());
-        REQUIRE(out_bcoor1.size() == out_bcoor3.size());
 
-        for(const auto [b1, b2, b3] : views::zip(out_bcoor1, out_bcoor2, out_bcoor3))
+        for(const auto [b1, b2] : views::zip(out_bcoor1, out_bcoor2))
             for(auto i = 0; i < 3; ++i)
-            {
                 REQUIRE_THAT(b1[i], Catch::Matchers::WithinAbs(b2[i], epsilon));
-                REQUIRE_THAT(b1[i], Catch::Matchers::WithinAbs(b3[i], epsilon));
-            }
     }
 }
+
+static_assert((10 - (10.f / 3.f) * 3.0) > 0);

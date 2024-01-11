@@ -11,6 +11,8 @@ include(Catch)
 #
 # Set the sources for the unit tests and add the executable(s)
 #
+set(lib_src src/test.cpp src/triangle.cpp)
+
 set(src
     src/test.cpp
     src/triangle.cpp
@@ -20,16 +22,16 @@ set(src
     src/rasterization/liang_barsky_clipping.cpp
     src/rasterization/raster_triangle.cpp)
 
-config_lib(${PROJECT_NAME}Lib INTERFACE)
+config_lib(${PROJECT_NAME}Lib SHARED SRC ${lib_src})
 
-target_link_libraries(${PROJECT_NAME}Lib INTERFACE ${CMAKE_PROJECT_NAME}
+target_link_libraries(${PROJECT_NAME}Lib PUBLIC ${CMAKE_PROJECT_NAME}
                                                    Catch2::Catch2)
 
 set_target_properties(${PROJECT_NAME}Lib PROPERTIES COMPILE_WARNING_AS_ERROR ON)
 
 target_compile_options(
   ${PROJECT_NAME}Lib
-  INTERFACE $<$<CXX_COMPILER_ID:MSVC>:/W4>
+  PUBLIC $<$<CXX_COMPILER_ID:MSVC>:/W4>
             $<$<CXX_COMPILER_ID:Clang>:-Qunused-arguments -ftime-trace
             -fdiagnostics-show-template-tree>)
 
@@ -49,7 +51,7 @@ option(ENABLE_CLANG_TIDY "Enable clang-tidy" OFF)
 if(${ENABLE_CLANG_TIDY})
   message(STATUS "clang-tidy is enabled")
 
-  target_enable_clang_tidy(${PROJECT_NAME})
+  target_enable_clang_tidy(${PROJECT_NAME}Lib)
 endif()
 
 catch_discover_tests(${PROJECT_NAME})
