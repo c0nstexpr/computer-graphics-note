@@ -127,12 +127,9 @@ namespace graphics::rasterization
                 f0_a * px.min + f0_b * py.min + f0_c
             };
 
-            auto b_xy = out_t_vec{f_xy} / f_den;
-
             // NOLINTBEGIN(cert-flp30-c)
-            for(glm::vec<2, T, Q> p{0, py.min}; p.y <= py.max; ++p.y, b_xy += b_dy, f_xy += f_dy)
+            for(glm::vec<2, T, Q> p{0, py.min}; p.y <= py.max; ++p.y, f_xy += f_dy)
             {
-                auto b_xy_tmp = b_xy;
                 auto out_f_xy = f_xy;
 
                 // triangle is convex
@@ -140,18 +137,18 @@ namespace graphics::rasterization
                     ((out_f_xy[0] <=> 0) != f_den_cmp[0] || //
                      (out_f_xy[1] <=> 0) != f_den_cmp[1] || //
                      (out_f_xy[2] <=> 0) != f_den_cmp[2]);
-                    ++p.x, b_xy_tmp += b_dx, out_f_xy += f_dx)
+                    ++p.x, out_f_xy += f_dx)
                 {
                 }
 
-                for(; p.x <= px.max && //
+                for(auto b_xy = out_t_vec{out_f_xy} / f_den; p.x <= px.max && //
                     (out_f_xy[0] <=> 0) == f_den_cmp[0] && //
                     (out_f_xy[1] <=> 0) == f_den_cmp[1] && //
                     (out_f_xy[2] <=> 0) == f_den_cmp[2];
-                    ++p.x, b_xy_tmp += b_dx, out_f_xy += f_dx)
+                    ++p.x, b_xy += b_dx, out_f_xy += f_dx)
                 {
                     *out_p++ = p;
-                    *out_bcoor++ = b_xy_tmp;
+                    *out_bcoor++ = b_xy;
                 }
             } // NOLINTEND(cert-flp30-c)
         }
@@ -204,8 +201,6 @@ namespace graphics::rasterization
             const t_vec f_dx{f1_a, f2_a, f0_a};
             const t_vec f_dy{f1_b, f2_b, f0_b};
 
-            const auto b_dx = out_t_vec{f_dx} / f_den;
-
             const auto px = std::ranges::minmax({p0.x, p1.x, p2.x});
             const auto py = std::ranges::minmax({p0.y, p1.y, p2.y});
 
@@ -235,11 +230,7 @@ namespace graphics::rasterization
                     ++p.x, out_f_xy += f_dx)
                 {
                     *out_p++ = p;
-                    *out_bcoor++ = out_t_vec{
-                        out_f_xy[0] / f_den[0],
-                        out_f_xy[1] / f_den[1],
-                        out_f_xy[2] / f_den[2]
-                    };
+                    *out_bcoor++ = out_t_vec{out_f_xy} / f_den;
                 }
             }
         }

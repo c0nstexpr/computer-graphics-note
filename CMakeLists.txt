@@ -27,4 +27,6 @@ verbose_message("Successfully added all dependencies and linked against them.")
 include(CTest)
 add_subdirectory(tests)
 
-add_subdirectory(benchmark)
+if("${CMAKE_BUILD_TYPE}" MATCHES "Release")
+  add_subdirectory(benchmark)
+endif()
