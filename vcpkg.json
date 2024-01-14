@@ -5,7 +5,7 @@
     "stdsharp",
     "catch2",
     "glm",
-    "benchmark"
+    "nanobench"
   ],
   "overrides": [],
   "vcpkg-configuration": {
