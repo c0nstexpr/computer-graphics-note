@@ -2,9 +2,9 @@
 #include <filesystem>
 #include <nanobench.h>
 #include <print>
-#include <iostream>
 
 #include <cxxopts.hpp>
+#include <stdsharp/random/random.h>
 
 #include "rasterization/raster_triangle.h"
 
@@ -19,15 +19,14 @@ using namespace cxxopts;
 
 namespace
 {
-    inline constexpr auto output_arg = "output"sv;
-
-    void output_to_file(const ParseResult& result, Bench& b)
+    void output_to_file(const ParseResult& result, const Bench& b)
     {
-        const auto& output = result[output_arg.data()].as<path>();
-        const auto& html_plot = htmlBoxplot();
+        const auto& output = result["output"].as<path>();
+        const auto& html_plot = csv();
         constexpr auto file_mode = ofstream::out | ofstream::trunc;
         constexpr auto fs_exception_bits = ofstream::failbit | ofstream::badbit;
-        const auto& render_html_path = output / "benchmark-render.html";
+        const auto& render_html_path = output / (b.name() + ".csv");
+
         ofstream render_fs{render_html_path, file_mode};
 
         render_fs.exceptions(fs_exception_bits);
@@ -38,13 +37,19 @@ namespace
 
 int main(int argc, char* const argv[])
 {
+    constexpr auto invalid_seed{static_cast<u64>(-1)};
     Options options{"Graphics Library Benchmark", "Run benchmark for graphics library"};
 
-    options
-        .add_options()("o,output", "Report file directory for benchmark results", value<path>()->default_value("./"))(
-            "h,help",
-            "Print usage"
-        );
+    {
+        options.add_options() //
+            ("o,output",
+             "Report file directory for benchmark results",
+             value<path>()->default_value("./")) //
+            ("s,seed",
+             "Set seed for benchmark results",
+             value<u64>()->default_value(std::to_string(invalid_seed))) //
+            ("h,help", "Print usage");
+    }
 
     const auto& result = options.parse(argc, argv);
 
@@ -54,14 +59,13 @@ int main(int argc, char* const argv[])
         return 0;
     }
 
-    Bench b;
+    auto seed = get_random_device()();
 
-    raster_triangle_benchmark(b);
+    if(const auto seed_arg = result["seed"].as<u64>(); seed_arg != invalid_seed) seed = seed_arg;
 
-    b.relative(false);
-    b.minEpochIterations();
+    println("Current random seed: {}", seed);
 
-    output_to_file(result, b);
+    output_to_file(result, raster_triangle_benchmark(seed));
 
     return 0;
 }

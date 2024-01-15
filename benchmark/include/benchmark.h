@@ -10,5 +10,5 @@ inline constexpr auto bench_run = []<typename... Args, std::invocable<Args...> F
                                       Args&&... args
                                   )
 {
-    return b.run(name, std::bind_front(cpp_forward(fn), cpp_forward(args)...)); //
+    return b.run(name.data(), std::bind_front(cpp_forward(fn), cpp_forward(args)...)); //
 };
