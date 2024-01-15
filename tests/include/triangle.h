@@ -27,7 +27,11 @@ namespace Catch
         triangle current_{};
 
     public:
-        random_triangle_generator(const T low, const T high): m_gen(low, high) { next(); }
+        random_triangle_generator(const T low, const T high, const seed_t seed = default_seed):
+            m_gen(low, high, seed)
+        {
+            next();
+        }
 
         [[nodiscard]] const triangle& get() const override { return current_; }
 

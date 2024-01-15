@@ -5,7 +5,8 @@
     "stdsharp",
     "catch2",
     "glm",
-    "nanobench"
+    "nanobench",
+    "cxxopts"
   ],
   "overrides": [],
   "vcpkg-configuration": {

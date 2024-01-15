@@ -56,8 +56,8 @@ void validate_fn(
 
 SCENARIO("draw line", "[bresenham_draw_line]")
 {
-    const ivec2 p0 = GENERATE(take(100, Catch::random_glm_vec<2>(-100, 100)));
-    const ivec2 p1 = GENERATE(take(1, Catch::random_glm_vec<2>(-100, 100)));
+    const ivec2 p0 = GENERATE(take(100, Catch::random_glm_vec<2>(-100, 100, Catch::getSeed())));
+    const ivec2 p1 = GENERATE(take(1, Catch::random_glm_vec<2>(-100, 100, Catch::getSeed())));
     auto dx = GENERATE(take(1, random(-100, 100)));
     auto dy = GENERATE(take(1, random(-100, 100)));
 

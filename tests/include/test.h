@@ -5,6 +5,7 @@
 #include <random>
 
 #include <catch2/generators/catch_generators_all.hpp>
+#include <catch2/catch_get_random_seed.hpp>
 #include <catch2/matchers/catch_matchers_all.hpp>
 #include <catch2/reporters/catch_reporters_all.hpp>
 #include <catch2/catch_test_macros.hpp>
@@ -43,6 +44,10 @@ namespace glm
 
 std::mt19937_64& get_mt_engine();
 
+using seed_t = std::mt19937_64::result_type;
+
+inline constexpr auto default_seed = std::mt19937_64::default_seed;
+
 namespace Catch
 {
     template<glm::length_t L, typename T, glm::qualifier Q = glm::defaultp>
@@ -56,23 +61,29 @@ namespace Catch
         using typename Generators::IGenerator<glm::vec<L, T, Q>>::type;
 
         dist_t m_dist;
+        std::mt19937_64 m_engine;
         type current_{};
 
     public:
-        random_glm_vec_generator(const T low, const T high): m_dist(low, high) { next(); }
+        random_glm_vec_generator(const T low, const T high, const seed_t seed = default_seed):
+            m_dist(low, high), m_engine(seed)
+        {
+            next();
+        }
 
         const type& get() const override { return current_; }
 
         bool next() override
         {
-            for(glm::length_t i = 0; i < L; ++i) current_[i] = m_dist(get_mt_engine());
+            for(glm::length_t i = 0; i < L; ++i) current_[i] = m_dist(m_engine);
             return true;
         }
     };
 
     template<glm::length_t L, typename T, glm::qualifier Q = glm::defaultp>
-    Generators::GeneratorWrapper<glm::vec<L, T, Q>> random_glm_vec(const T low, decltype(low) high)
+    Generators::GeneratorWrapper<glm::vec<L, T, Q>>
+        random_glm_vec(const T low, decltype(low) high, const seed_t seed = default_seed)
     {
-        return new random_glm_vec_generator<L, T, Q>{low, high}; // NOLINT(*-owning-memory)
+        return new random_glm_vec_generator<L, T, Q>{low, high, seed}; // NOLINT(*-owning-memory)
     }
 }
