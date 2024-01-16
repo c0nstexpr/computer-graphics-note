@@ -15,7 +15,7 @@ using namespace ankerl::nanobench;
 
 Bench raster_triangle_benchmark(const seed_t seed)
 {
-    static constexpr auto iterations = 20000;
+    static constexpr auto iterations = 100;
     static constexpr auto min = -100;
     static constexpr auto max = 100;
     static constexpr size_t value_range = max - min;
