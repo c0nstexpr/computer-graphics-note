@@ -1,8 +1,5 @@
-#include <range/v3/view/cycle.hpp>
-
 #include "rasterization/raster_triangle.h"
 #include "graphics/rasterization/raster_triangle.h"
-#include "random.h"
 #include "triangle.h"
 
 using namespace std;
@@ -13,34 +10,36 @@ using namespace graphics::rasterization;
 using namespace graphics::benchmark;
 using namespace ankerl::nanobench;
 
-Bench raster_triangle_benchmark(const seed_t seed)
+namespace graphics::benchmark
 {
-    static constexpr auto iterations = 100;
     static constexpr auto min = -100;
     static constexpr auto max = 100;
     static constexpr size_t value_range = max - min;
 
-    const auto& random_triangles =
-        get_random_data(iterations, Catch::random_triangle_generator<int64>{min, max, seed});
-    std::vector<i64vec2> out{value_range * value_range};
-    std::vector<f64vec2> out_b{out.size()};
-    const auto& rng = ::ranges::views::cycle(random_triangles);
-    auto fn = [&, it = rng.begin()](const auto fn) mutable
+    Bench raster_triangle(unsigned iterations, const seed_t seed)
     {
-        const auto& [p0, p1, p2] = *(it++);
+        const auto& random_triangles =
+            get_random_data(iterations, random_triangle_generator<int64>{min, max, seed});
+        const auto& rng = ::ranges::views::cycle(random_triangles);
+        vector<i64vec2> out{value_range * value_range};
+        vector<f64vec2> out_b{out.size()};
+        auto fn = [&, it = rng.begin()](const auto fn) mutable
+        {
+            const auto& [p0, p1, p2] = *(it++);
 
-        fn(p0, p1, p2, out.begin(), out_b.begin());
+            fn(p0, p1, p2, out.begin(), out_b.begin());
 
-        doNotOptimizeAway(out);
-        doNotOptimizeAway(out_b);
-    };
-    Bench b;
+            doNotOptimizeAway(out);
+            doNotOptimizeAway(out_b);
+        };
+        Bench b;
 
-    b.title("raster triangle").warmup(3).minEpochIterations(iterations).relative(true);
+        b.title("raster triangle").warmup(3).minEpochIterations(iterations).relative(true);
 
-    bench_run(b, "trivial", fn, trivial_raster_triangle<f64>);
-    bench_run(b, "floating incremental", fn, floating_incremental_raster_triangle<f64>);
-    bench_run(b, "integral incremental", fn, integral_incremental_raster_triangle<f64>);
+        bench_run(b, "trivial", fn, trivial_raster_triangle<f64>);
+        bench_run(b, "floating incremental", fn, floating_incremental_raster_triangle<f64>);
+        bench_run(b, "integral incremental", fn, integral_incremental_raster_triangle<f64>);
 
-    return b;
+        return b;
+    }
 }

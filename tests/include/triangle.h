@@ -17,18 +17,18 @@ namespace graphics::test
 
 namespace Catch
 {
-    template<typename T>
+    template<typename T, std::uniform_random_bit_generator Engine = std::mt19937_64>
     class random_triangle_generator final :
         public Generators::IGenerator<graphics::test::triangle<T>>
     {
         using triangle = graphics::test::triangle<T>;
 
-        random_glm_vec_generator<2, T> m_gen;
+        random_glm_vec_generator<2, T, Engine> m_gen;
         triangle current_{};
 
     public:
-        random_triangle_generator(const T low, const T high, const seed_t seed = default_seed):
-            m_gen(low, high, seed)
+        random_triangle_generator(const T low, const T high, auto&&... args):
+            m_gen(low, high, cpp_forward(args)...)
         {
             next();
         }
@@ -57,10 +57,10 @@ namespace Catch
         }
     };
 
-    template<typename T>
+    template<typename T, std::uniform_random_bit_generator Engine = std::mt19937_64>
     Generators::GeneratorWrapper<graphics::test::triangle<T>>
-        random_triangle(const T low, decltype(low) high)
-    {
-        return new random_triangle_generator{low, high}; // NOLINT(*-owning-memory)
+        random_triangle(const T low, decltype(low) high, auto&&... args)
+    { // NOLINTNEXTLINE(*-owning-memory)
+        return new random_triangle_generator<T, Engine>{low, high, cpp_forward(args)...};
     }
 }

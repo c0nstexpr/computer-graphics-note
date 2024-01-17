@@ -12,6 +12,8 @@
 
 #include <glm/glm.hpp>
 
+#include <stdsharp/concepts/concepts.h>
+
 namespace std
 {
     template<typename CharT, typename T, glm::length_t L, glm::qualifier Qualifier>
@@ -32,6 +34,17 @@ namespace std
     };
 }
 
+template<std::uniform_random_bit_generator T = std::mt19937_64>
+struct random_engine_wrapper : std::reference_wrapper<T>
+{
+    using std::reference_wrapper<T>::reference_wrapper;
+
+    using result_type = typename T::result_type;
+
+    static constexpr auto min() { return T::min(); }
+    static constexpr auto max() { return T::max(); }
+};
+
 namespace glm
 {
     template<typename CharT, typename T, glm::length_t L, qualifier Qualifier>
@@ -42,31 +55,30 @@ namespace glm
     }
 }
 
-std::mt19937_64& get_mt_engine();
-
-using seed_t = std::mt19937_64::result_type;
-
-inline constexpr auto default_seed = std::mt19937_64::default_seed;
-
 namespace Catch
 {
-    template<glm::length_t L, typename T, glm::qualifier Q = glm::defaultp>
-    class random_glm_vec_generator final : public Generators::IGenerator<glm::vec<L, T, Q>>
+    template<
+        glm::length_t L,
+        typename T,
+        std::uniform_random_bit_generator Engine = std::mt19937_64>
+    class random_glm_vec_generator final : public Generators::IGenerator<glm::vec<L, T>>
     {
+    public:
+        using typename Generators::IGenerator<glm::vec<L, T>>::type;
+
+    private:
         using dist_t = std::conditional_t<
             std::floating_point<T>,
             std::uniform_real_distribution<T>,
             std::uniform_int_distribution<T>>;
 
-        using typename Generators::IGenerator<glm::vec<L, T, Q>>::type;
-
         dist_t m_dist;
-        std::mt19937_64 m_engine;
+        Engine m_engine;
         type current_{};
 
     public:
-        random_glm_vec_generator(const T low, const T high, const seed_t seed = default_seed):
-            m_dist(low, high), m_engine(seed)
+        random_glm_vec_generator(const T low, const T high, auto&&... args):
+            m_dist(low, high), m_engine(cpp_forward(args)...)
         {
             next();
         }
@@ -78,12 +90,17 @@ namespace Catch
             for(glm::length_t i = 0; i < L; ++i) current_[i] = m_dist(m_engine);
             return true;
         }
+
+        auto& engine() { return m_engine; }
     };
 
-    template<glm::length_t L, typename T, glm::qualifier Q = glm::defaultp>
-    Generators::GeneratorWrapper<glm::vec<L, T, Q>>
-        random_glm_vec(const T low, decltype(low) high, const seed_t seed = default_seed)
-    {
-        return new random_glm_vec_generator<L, T, Q>{low, high, seed}; // NOLINT(*-owning-memory)
+    template<
+        glm::length_t L,
+        typename T,
+        std::uniform_random_bit_generator Engine = std::mt19937_64>
+    Generators::GeneratorWrapper<glm::vec<L, T>>
+        random_glm_vec(const T low, decltype(low) high, auto&&... args)
+    { // NOLINTNEXTLINE(*-owning-memory)
+        return new random_glm_vec_generator<L, T, Engine>{low, high, cpp_forward(args)...};
     }
 }

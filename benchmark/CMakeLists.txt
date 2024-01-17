@@ -11,7 +11,8 @@ find_package(cxxopts CONFIG REQUIRED)
 #
 # Set the sources for the unit tests and add the executable(s)
 #
-set(src src/main.cpp src/rasterization/raster_triangle.cpp)
+set(src src/main.cpp src/rasterization/raster_triangle.cpp
+        src/rasterization/raster_line.cpp)
 
 config_lib(${PROJECT_NAME}Lib INTERFACE)
 

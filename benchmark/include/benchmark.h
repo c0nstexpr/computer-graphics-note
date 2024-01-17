@@ -1,6 +1,10 @@
+#pragma once
+
 #include <nanobench.h>
+#include <range/v3/view/cycle.hpp>
 #include <stdsharp/functional/invoke.h>
 
+#include "random.h"
 #include "test.h"
 
 inline constexpr auto bench_run = []<typename... Args, std::invocable<Args...> Fn>(
