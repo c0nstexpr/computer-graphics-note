@@ -22,8 +22,20 @@ SCENARIO("raster triangle", "[raster_triangle]") // NOLINT(*-cognitive-complexit
         constexpr auto epsilon = 0.001f;
 
         trivial_raster_triangle<>(p0, p1, p2, back_inserter(out1), back_inserter(out_bcoor1));
-        floating_incremental_raster_triangle<>(p0, p1, p2, back_inserter(out2), back_inserter(out_bcoor2));
-        integral_incremental_raster_triangle<>(p0, p1, p2, back_inserter(out3), back_inserter(out_bcoor3));
+        floating_incremental_raster_triangle<>(
+            p0,
+            p1,
+            p2,
+            back_inserter(out2),
+            back_inserter(out_bcoor2)
+        );
+        integral_incremental_raster_triangle<>(
+            p0,
+            p1,
+            p2,
+            back_inserter(out3),
+            back_inserter(out_bcoor3)
+        );
 
         REQUIRE_THAT(out1, Catch::Matchers::RangeEquals(out2));
         REQUIRE_THAT(out1, Catch::Matchers::RangeEquals(out3));

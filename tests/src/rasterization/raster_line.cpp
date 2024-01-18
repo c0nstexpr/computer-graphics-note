@@ -11,7 +11,7 @@ bool is_followed(const auto l, const auto r) { return is_eq(l) || (l == r); }
 
 SCENARIO("draw line", "[raster_line]")
 {
-    std::mt19937_64 engine{Catch::getSeed()};
+    static std::mt19937_64 engine{Catch::getSeed()};
     const ivec2 p0 =
         GENERATE_REF(take(100, random_glm_vec<2, int, random_engine_wrapper<>>(-100, 100, engine)));
     const ivec2 p1 =

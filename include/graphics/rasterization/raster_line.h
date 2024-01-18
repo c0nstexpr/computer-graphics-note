@@ -20,6 +20,7 @@ namespace graphics::rasterization
 
     public:
         template<typename T, glm::qualifier Qualifier>
+            requires(!stdsharp::unsigned_<T>)
         constexpr auto operator()(
             glm::vec<2, T, Qualifier> p0,
             const decltype(p0) p1,
@@ -49,24 +50,23 @@ namespace graphics::rasterization
                 return;
             }
 
-            // a = -diff.y;
-            // b = diff.x;
-            const auto c_cmp = (diff.y * d.x - diff.x * d.y) <=> 0;
-            const auto c_dy = diff.x * d.y;
-            const auto c2_dy = 2 * c_dy;
+            // a = diff.y;
+            // b = -diff.x;
+            const auto c = diff.y * p0.x - diff.x * p0.y;
+            const auto c_dy = -diff.x * d.y;
 
             for(; is_followed(p1.x <=> p0.x, x_diff_cmp); p0.x += d.x)
             {
-                auto current_c2 = 2 * (diff.y * p0.x - diff.x * p0.y);
-                if(is_followed(current_c2 + c_dy <=> 0, c_cmp)) do // NOLINT(*-do-while)
+                auto current_c = diff.y * p0.x - diff.x * p0.y;
+                if(abs(current_c - c) >= abs(current_c + c_dy - c)) do // NOLINT(*-do-while)
                     {
                         p0.y += d.y;
                         if(!is_followed(p1.y <=> p0.y, y_diff_cmp)) return;
 
                         *(out_it++) = p0;
 
-                        current_c2 += c2_dy;
-                    } while(is_followed(current_c2 + c_dy <=> 0, c_cmp));
+                        current_c += c_dy;
+                    } while(abs(current_c - c) >= abs(current_c + c_dy - c));
                 else *(out_it++) = p0;
             }
         }
@@ -83,6 +83,7 @@ namespace graphics::rasterization
 
     public:
         template<typename T, glm::qualifier Qualifier>
+            requires(!stdsharp::unsigned_<T>)
         constexpr auto operator()(
             glm::vec<2, T, Qualifier> p0,
             const decltype(p0) p1,

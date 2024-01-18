@@ -11,14 +11,13 @@ find_package(cxxopts CONFIG REQUIRED)
 #
 # Set the sources for the unit tests and add the executable(s)
 #
-set(src src/main.cpp src/rasterization/raster_triangle.cpp
-        src/rasterization/raster_line.cpp)
+set(src src/main.cpp)
 
 config_lib(${PROJECT_NAME}Lib INTERFACE)
 
 target_link_libraries(
-  ${PROJECT_NAME}Lib INTERFACE ${CMAKE_PROJECT_NAME}TestsLib
-                               nanobench::nanobench cxxopts::cxxopts)
+  ${PROJECT_NAME}Lib INTERFACE ${CMAKE_PROJECT_NAME} nanobench::nanobench
+                               cxxopts::cxxopts)
 
 config_exe(${PROJECT_NAME} EXE_SRC ${src})
 

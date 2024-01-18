@@ -1,11 +1,9 @@
+#include <chrono>
 #include <fstream>
 #include <filesystem>
-#include <nanobench.h>
 #include <print>
 
 #include <cxxopts.hpp>
-#include <stdsharp/algorithm/algorithm.h>
-#include <stdsharp/random/random.h>
 
 #include "rasterization/raster_line.h"
 #include "rasterization/raster_triangle.h"
@@ -13,8 +11,6 @@
 using namespace std;
 using namespace filesystem;
 using namespace stdsharp;
-using namespace glm;
-using namespace Catch;
 using namespace ankerl::nanobench;
 using namespace templates;
 using namespace cxxopts;
@@ -24,10 +20,9 @@ using bench_config = ankerl::nanobench::Config;
 
 namespace
 {
-
     constexpr auto html_template =
 #pragma region
-        R"(
+        R"template(
 <html>
 
 <head>
@@ -107,16 +102,18 @@ namespace
                     header: {
                         values: [
                             ["Name"],
-                            ["Average"],
+                            ["Total(s)"],
+                            ["Average(ms)"],
                             ["Median Absolute Percent Error"]
                         ],
                         align: "center"
                     },
                     cells: {
-                        format: [null, "~f", ".2%"],
+                        format: [null, ".2f", ".2f", ".2%"],
                         values: [
                             [{{#result}}'{{name}}',{{/result}}],
-                            [{{#result}}{{average(elapsed)}},{{/result}}],
+                            [{{#result}}{{sumProduct(iterations, elapsed)}},{{/result}}],
+                            [{{#result}}{{average(elapsed)}} * 1000,{{/result}}],
                             [{{#result}}{{medianAbsolutePercentError(elapsed)}},{{/result}}],
                             [{{#result}}{{context(relative)}},{{/result}}]
                         ]
@@ -125,6 +122,7 @@ namespace
             ];
 
             var tableDiv = document.createElement("div");
+            var minTime = {{epochs}} * {{minEpochTime}};
 
             if({{relative}}) {
                 var tb = tableData[0];
@@ -135,31 +133,27 @@ namespace
             tableDiv.id = "tableDiv" ;
             document.body.appendChild(tableDiv);
 
-            Plotly.newPlot(tableDiv.id, tableData, { title : '{{title}} Elapsed Time' });
+            Plotly.newPlot(tableDiv.id, tableData, { title : `{{title}} Elapsed (${minTime}s Minimum)` });
         }
 
     </script>
 </body>
 </html>
-)";
+)template";
 #pragma endregion
 
-    void output_to_file(const ParseResult& result, decay_same_as<Bench> auto&& b)
+    void output_to_file(const path& dir, decay_same_as<Bench> auto&& b)
     {
-        const auto& render_html_path =
-            result["output"].as<path>() / (b.title() + " benchmark.html");
+        const auto& render_html_path = dir / (b.title() + " benchmark.html");
         ofstream render_fs{render_html_path, ofstream::out | ofstream::trunc};
         vector<Result> results = b.results();
 
-        if(b.relative())
-        {
-            constexpr auto elapsed_enum = Result::Measure::elapsed;
-
-            for(const auto baseline = results[0].average(elapsed_enum);
-                auto& r : results) // NOLINTNEXTLINE(*-const-cast)
-                const_cast<unordered_map<string, string>&>(r.config().mContext)["relative"] =
-                    to_string(baseline / r.average(elapsed_enum));
-        }
+        if(constexpr auto elapsed_enum = Result::Measure::elapsed; b.relative())
+            for(const auto baseline = results[0].average(elapsed_enum); auto& r : results)
+            { // NOLINTNEXTLINE(*-const-cast)
+                auto& context = const_cast<unordered_map<string, string>&>(r.config().mContext);
+                context["relative"] = to_string(baseline / r.average(elapsed_enum));
+            }
 
         render_fs.exceptions(ofstream::failbit | ofstream::badbit);
         println("output benchmark rendered result to path {}", render_html_path.c_str());
@@ -169,47 +163,54 @@ namespace
 
 int main(int argc, char* const argv[])
 {
-    constexpr auto draw_line_iterations_arg = "draw-line-iterations";
-    constexpr auto raster_triangle_iterations_arg = "raster-triangle-iterations";
-    constexpr auto invalid_seed{static_cast<u64>(-1)};
+    constexpr auto epoch_arg = "epoch";
+    constexpr auto min_epoch_time_arg = "min-epoch-time";
     Options options{"Graphics Library Benchmark", "Run benchmark for graphics library"};
 
     options.add_options() //
         ("o,output",
-         "Report file directory for benchmark results",
+         "Report file directory for results",
          value<path>()->default_value("./")) //
-        ("s,seed",
-         "Set seed for benchmark results",
-         value<u64>()->default_value(std::to_string(invalid_seed))) //
-        (raster_triangle_iterations_arg,
-         "Set iterations for raster triangle benchmark",
-         value<unsigned>()->default_value("10000")) //
-        (draw_line_iterations_arg,
-         "Set iterations for raster triangle benchmark",
-         value<unsigned>()->default_value("10000")) //
+        ("e,"s + epoch_arg,
+         "Set epoch times",
+         value<unsigned>()->default_value("10")) //
+        ("m,"s + min_epoch_time_arg,
+         "Set minimum time each epoch should take(ms)",
+         value<unsigned>()->default_value("100")) //
         ("h,help", "Print usage");
 
-
-    const auto& result = options.parse(argc, argv);
-
-    if(result.count("help") != 0)
+    try
     {
-        std::println("{}", options.help());
-        return 0;
+        const auto& result = options.parse(argc, argv);
+        const auto bench_fn =
+            [epoch = result[epoch_arg].as<unsigned>(),
+             min_epoch_time =
+                 chrono::milliseconds{result[min_epoch_time_arg].as<unsigned>()}](Bench& b)
+        {
+            b.epochs(epoch).minEpochTime(min_epoch_time).warmup(3); //
+        };
+
+        if(result.count("help") != 0)
+        {
+            std::println("{}", options.help());
+            return 0;
+        }
+
+        for( //
+            const auto& out_dir = result["output"].as<path>(); //
+            const auto& b :
+            {
+                raster_line(bench_fn),
+                raster_triangle(bench_fn) //
+            } //
+        )
+            output_to_file(out_dir, b);
     }
-
-    auto seed = result["seed"].as<u64>();
-
-    set_if_less(seed, get_random_device()());
-
-    println("Current random seed: {}", seed);
-
-    output_to_file(
-        result,
-        raster_triangle(result[raster_triangle_iterations_arg].as<unsigned>(), seed)
-    );
-
-    output_to_file(result, raster_line(result[draw_line_iterations_arg].as<unsigned>(), seed));
+    catch(const exception& e)
+    {
+        println("{}", e.what());
+        return 1;
+    }
 
     return 0;
 }
