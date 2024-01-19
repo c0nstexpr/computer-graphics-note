@@ -20,7 +20,7 @@ namespace graphics::rasterization
 
     public:
         template<typename T, glm::qualifier Qualifier>
-            requires(!stdsharp::unsigned_<T>)
+            requires(!star::unsigned_<T>)
         constexpr auto operator()(
             glm::vec<2, T, Qualifier> p0,
             const decltype(p0) p1,
@@ -83,7 +83,7 @@ namespace graphics::rasterization
 
     public:
         template<typename T, glm::qualifier Qualifier>
-            requires(!stdsharp::unsigned_<T>)
+            requires(!star::unsigned_<T>)
         constexpr auto operator()(
             glm::vec<2, T, Qualifier> p0,
             const decltype(p0) p1,

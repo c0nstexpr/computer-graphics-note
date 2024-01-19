@@ -12,7 +12,7 @@ namespace graphics::rasterization
     struct trivial_raster_triangle_fn
     {
         template<star::explicitly_convertible<OutT> T, glm::qualifier Q>
-            requires(!stdsharp::unsigned_<T>)
+            requires(!star::unsigned_<T>)
         constexpr void operator()(
             const glm::vec<2, T, Q>& p0,
             decltype(p0) p1,
@@ -77,7 +77,7 @@ namespace graphics::rasterization
     struct floating_incremental_raster_triangle_fn
     {
         template<star::explicitly_convertible<OutT> T, glm::qualifier Q>
-            requires(!stdsharp::unsigned_<T>)
+            requires(!star::unsigned_<T>)
         constexpr void operator()(
             const glm::vec<2, T, Q>& p0,
             decltype(p0) p1,
@@ -164,7 +164,7 @@ namespace graphics::rasterization
     struct integral_incremental_raster_triangle_fn
     {
         template<star::explicitly_convertible<OutT> T, glm::qualifier Q>
-            requires(!stdsharp::unsigned_<T>)
+            requires(!star::unsigned_<T>)
         constexpr void operator()(
             const glm::vec<2, T, Q>& p0,
             decltype(p0) p1,

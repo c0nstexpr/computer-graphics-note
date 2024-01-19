@@ -187,7 +187,7 @@ int main(int argc, char* const argv[])
              min_epoch_time =
                  chrono::milliseconds{result[min_epoch_time_arg].as<unsigned>()}](Bench& b)
         {
-            b.epochs(epoch).minEpochTime(min_epoch_time).warmup(3); //
+            b.epochs(epoch).minEpochTime(min_epoch_time).warmup(10); //
         };
 
         if(result.count("help") != 0)

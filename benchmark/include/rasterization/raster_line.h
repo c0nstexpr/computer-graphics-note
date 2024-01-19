@@ -5,7 +5,7 @@
 
 namespace graphics::benchmark
 {
-    auto raster_line(std::invocable<ankerl::nanobench::Bench&> auto bench_fn = stdsharp::empty)
+    auto raster_line(std::invocable<ankerl::nanobench::Bench&> auto bench_fn = star::empty)
     {
         using namespace std;
         using namespace stdsharp;
@@ -14,12 +14,12 @@ namespace graphics::benchmark
         using namespace ankerl::nanobench;
 
         auto value = single(i64vec2{});
+        const auto& out = cycle(value);
         Bench b;
-
-        auto fn = [out = cycle(value)](const auto fn) mutable
+        auto fn = [it = out.begin()](const auto fn) mutable
         {
             constexpr auto size = 1000;
-            for(const auto it = out.begin(); auto i : iota(0, size))
+            for(auto i : iota(0, size))
                 for(auto j : iota(0, size)) fn(i64vec2{}, {size, i}, it, {j, j});
         };
 

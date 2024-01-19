@@ -6,6 +6,8 @@
 #include <nanobench.h>
 #include <stdsharp/functional/bind_lvalue.h>
 
+#include "graphics/namespace_alias.h"
+
 namespace graphics::benchmark
 {
     using ::ranges::views::cycle;
@@ -19,6 +21,6 @@ namespace graphics::benchmark
                                           Args&&... args
                                       )
     {
-        return b.run(name.data(), stdsharp::bind_lvalue(cpp_forward(fn), cpp_forward(args)...)); //
+        return b.run(name.data(), star::bind_lvalue(cpp_forward(fn), cpp_forward(args)...)); //
     };
 }

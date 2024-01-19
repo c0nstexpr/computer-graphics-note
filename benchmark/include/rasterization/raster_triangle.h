@@ -5,7 +5,7 @@
 
 namespace graphics::benchmark
 {
-    auto raster_triangle(std::invocable<ankerl::nanobench::Bench&> auto bench_fn = stdsharp::empty)
+    auto raster_triangle(std::invocable<ankerl::nanobench::Bench&> auto bench_fn = star::empty)
     {
         using namespace std;
         using namespace stdsharp;
@@ -15,14 +15,16 @@ namespace graphics::benchmark
 
         auto p_value = single(i64vec2{});
         auto b_value = single(f64vec2{});
+        const auto& p_out = cycle(p_value);
+        const auto& b_out = cycle(b_value);
         Bench b;
-        auto fn = [p_out = cycle(p_value), b_out = cycle(b_value)](const auto fn) mutable
+        auto fn = [p_it = p_out.begin(), b_it = b_out.begin()](const auto fn) mutable
         {
             constexpr auto size = 100;
-            const auto p_it = p_out.begin();
-            const auto b_it = b_out.begin();
+            constexpr i64vec2 p0{};
+            constexpr i64vec2 p1{size, -size};
 
-            for(auto i : iota(0, size)) fn(i64vec2{}, {size, 0}, {i, size}, p_it, b_it);
+            for(auto i : iota(0, size)) fn(p0, p1, {i, size}, p_it, b_it);
         };
 
         b.title("raster triangle").relative(true);
