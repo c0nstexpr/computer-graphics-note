@@ -14,7 +14,7 @@ namespace graphics::rasterization
         template<star::explicitly_convertible<OutT> T, glm::qualifier Q>
             requires(!star::unsigned_<T>)
         constexpr void operator()(
-            const glm::vec<2, T, Q>& p0,
+            const glm::vec<2, T, Q> p0,
             decltype(p0) p1,
             decltype(p0) p2,
             std::output_iterator<glm::vec<2, T, Q>> auto out_p,
@@ -68,6 +68,75 @@ namespace graphics::rasterization
                 }
             }
         }
+
+    private:
+        template<star::explicitly_convertible<OutT> T, glm::qualifier Q>
+        static constexpr bool is_rasterizable(const glm::vec<2, T, Q> line_param, OutT b)
+        {
+            return (b > 0) || (line_param.x > 0) || (line_param.y > 0);
+        }
+
+        template<star::explicitly_convertible<OutT> T, glm::qualifier Q>
+            requires(!star::unsigned_<T>)
+        static constexpr void windowed(
+            const glm::vec<2, T, Q> min,
+            decltype(min) max,
+            std::remove_const_t<decltype(min)> p0,
+            decltype(p0) p1,
+            decltype(p0) p2,
+            std::output_iterator<glm::vec<2, T, Q>> auto out_p,
+            std::output_iterator<glm::vec<3, OutT, Q>> auto out_bcoor
+        )
+        {
+            using t_vec = glm::vec<3, T, Q>;
+            using out_t_vec = glm::vec<3, OutT, Q>;
+
+            // f0(x, y) => (y0 - y1)x + (x1 - x0)y + x0y1 - x1y0
+            const auto f0_a = p0.y - p1.y; // y0 - y1
+            const auto f0_b = p1.x - p0.x; // x1 - x0
+            const auto f0_c = -f0_a * p0.x - f0_b * p0.y;
+
+            // f1(x, y) => (y1 - y2)x + (x2 - x1)y + x1y2 - x2y1
+            const auto f1_a = p1.y - p2.y; // y1 - y2
+            const auto f1_b = p2.x - p1.x; // x2 - x1
+            const auto f1_c = -f1_a * p1.x - f1_b * p1.y;
+
+            // f2(x, y) => (y2 - y0)x + (x0 - x2)y + x2y0 - x0y2
+            const auto f2_a = p2.y - p0.y; // y2 - y0
+            const auto f2_b = p0.x - p2.x; // x0 - x2
+            const auto f2_c = -f2_a * p2.x - f2_b * p2.y;
+
+            const out_t_vec f_den{
+                f1_a * p0.x + f1_b * p0.y + f1_c,
+                f2_a * p1.x + f2_b * p1.y + f2_c,
+                f0_a * p2.x + f0_b * p2.y + f0_c
+            };
+
+            if(f_den[0] == 0) return;
+
+            const out_t_vec bc{f1_c, f2_c, f0_c};
+
+            const auto px = std::ranges::minmax({p0.x, p1.x, p2.x});
+            const auto py = std::ranges::minmax({p0.y, p1.y, p2.y});
+
+            for(glm::vec<2, T, Q> p{0, py.min}; p.y <= py.max; ++p.y)
+            {
+                const auto by = out_t_vec{f1_b, f2_b, f0_b} * static_cast<OutT>(p.y) + bc;
+
+                for(p.x = px.min; p.x <= px.max; ++p.x)
+                {
+                    const auto bx =
+                        (out_t_vec{f1_a, f2_a, f0_a} * static_cast<OutT>(p.x) + by) / f_den;
+
+                    if(bx.x <= 0 || bx.y <= 0 || bx.z <= 0) continue;
+
+                    *out_p++ = p;
+                    *out_bcoor++ = bx;
+                }
+            }
+        }
+
+    public:
     };
 
     template<typename OutT = float>
