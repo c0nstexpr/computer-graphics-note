@@ -1,25 +1,24 @@
 {
-  "name": "cpp-template",
-  "version": "0.1.0",
-  "dependencies": [
-    "stdsharp",
-    "catch2",
-    "glm",
-    "nanobench",
-    "cxxopts"
-  ],
-  "overrides": [],
-  "vcpkg-configuration": {
-    "registries": [
-      {
-        "kind": "git",
-        "repository": "https://github.com/c0nstexpr/vcpkg-registry.git",
-        "baseline": "6d8f8a5bfa534104382a41c14b1dc9a4989e495b",
-        "packages": [
-          "stdsharp"
+    "name": "cpp-template",
+    "version": "0.1.0",
+    "dependencies": [
+        "stdsharp",
+        "catch2",
+        "glm",
+        "nanobench",
+        "cxxopts"
+    ],
+    "vcpkg-configuration": {
+        "registries": [
+            {
+                "kind": "git",
+                "repository": "https://github.com/c0nstexpr/vcpkg-registry.git",
+                "baseline": "f16311baae6573a7205214a1ac41e9dfaefeea2e",
+                "packages": [
+                    "stdsharp"
+                ]
+            }
         ]
-      }
-    ]
-  },
-  "builtin-baseline": "c75ff8cf3b784f67aa614552f32a6b2c7b9d8efc"
+    },
+    "builtin-baseline": "b2f8426094693faaeb29ec92aaae2ca393f6f0c9"
 }

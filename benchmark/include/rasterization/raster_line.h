@@ -1,6 +1,6 @@
 #pragma once
 
-#include "benchmark.h"
+#include "../benchmark.h"
 #include "graphics/rasterization/raster_line.h"
 
 namespace graphics::benchmark

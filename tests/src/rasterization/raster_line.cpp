@@ -7,7 +7,6 @@ using namespace glm;
 using namespace graphics::rasterization;
 using namespace Catch;
 
-bool is_followed(const auto l, const auto r) { return is_eq(l) || (l == r); }
 
 SCENARIO("draw line", "[raster_line]")
 {
@@ -19,8 +18,8 @@ SCENARIO("draw line", "[raster_line]")
     ivec2 d =
         GENERATE_REF(take(1, random_glm_vec<2, int, random_engine_wrapper<>>(-100, 100, engine)));
 
-    if(!is_followed(d.x <=> 0, p1.x - p0.x <=> 0)) d.x *= -1;
-    if(!is_followed(d.y <=> 0, p1.y - p0.y <=> 0)) d.y *= -1;
+    if(!conform_to(d.x <=> 0, p1.x - p0.x <=> 0)) d.x *= -1;
+    if(!conform_to(d.y <=> 0, p1.y - p0.y <=> 0)) d.y *= -1;
 
     GIVEN(format("line p0 = {}, p1 = {}, d = {}", p0, p1, d))
     WHEN("draw it")

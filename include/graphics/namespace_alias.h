@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdsharp/namespace_alias.h>
+
 #include <glm/glm.hpp>
 
 namespace graphics

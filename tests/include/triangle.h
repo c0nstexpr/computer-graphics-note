@@ -5,14 +5,7 @@
 namespace graphics::test
 {
     template<typename T>
-    struct triangle
-    {
-        using vec = glm::vec<2, T, glm::defaultp>;
-
-        vec p0{};
-        vec p1{};
-        vec p2{};
-    };
+    using triangle = std::array<glm::vec<2, T, glm::defaultp>, 3>;
 }
 
 namespace Catch
@@ -37,21 +30,26 @@ namespace Catch
 
         bool next() override
         {
-            current_.p0 = m_gen.get();
+            current_[0] = m_gen.get();
 
             do {
                 m_gen.next();
-                current_.p1 = m_gen.get();
-            } while(current_.p0 == current_.p1);
+                current_[1] = m_gen.get();
+            } while(current_[0] == current_[1]);
 
-            const auto line_a = current_.p1.y - current_.p0.y;
-            const auto line_b = current_.p0.x - current_.p1.x;
-            const auto line_c = line_a * current_.p0.x + line_b * current_.p0.y;
+            const auto u = current_[1] - current_[0];
+
+            auto cmp = std::strong_ordering::equal;
 
             do {
                 m_gen.next();
-                current_.p2 = m_gen.get();
-            } while((line_a * current_.p2.x + line_b * current_.p2.y) == line_c);
+                current_[2] = m_gen.get();
+
+                const auto v = current_[2] - current_[1];
+                cmp = u.x * v.y <=> u.y * v.x;
+            } while(is_eq(cmp));
+
+            if(is_lt(cmp)) std::ranges::swap(current_[0], current_[1]);
 
             return true;
         }

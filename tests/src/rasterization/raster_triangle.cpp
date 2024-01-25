@@ -6,47 +6,48 @@ using namespace stdsharp;
 using namespace glm;
 using namespace graphics::rasterization;
 
-SCENARIO("raster triangle", "[raster_triangle]") // NOLINT(*-cognitive-complexity)
+void validate(const auto p0, const auto p1, const auto p2)
 {
-    const auto [p0, p1, p2] = GENERATE(take(100, Catch::random_triangle(-100, 100)));
-
-    GIVEN(format("triangle p0 = {}, p1 = {}, p2 = {}", p0, p1, p2))
-    WHEN("rasterize it")
-    {
-        vector<ivec2> out1;
-        vector<ivec2> out2;
-        vector<ivec2> out3;
-        vector<vec3> out_bcoor1;
-        vector<vec3> out_bcoor2;
-        vector<vec3> out_bcoor3;
-        constexpr auto epsilon = 0.001f;
-
-        trivial_raster_triangle<>(p0, p1, p2, back_inserter(out1), back_inserter(out_bcoor1));
-        floating_incremental_raster_triangle<>(
-            p0,
-            p1,
-            p2,
-            back_inserter(out2),
-            back_inserter(out_bcoor2)
-        );
-        integral_incremental_raster_triangle<>(
-            p0,
-            p1,
-            p2,
-            back_inserter(out3),
-            back_inserter(out_bcoor3)
-        );
-
-        REQUIRE_THAT(out1, Catch::Matchers::RangeEquals(out2));
-        REQUIRE_THAT(out1, Catch::Matchers::RangeEquals(out3));
-        REQUIRE_THAT(out_bcoor1, Catch::Matchers::RangeEquals(out_bcoor3));
-
-        REQUIRE(out_bcoor1.size() == out_bcoor2.size());
-
-        for(const auto [b1, b2] : views::zip(out_bcoor1, out_bcoor2))
-            for(auto i = 0; i < 3; ++i)
-                REQUIRE_THAT(b1[i], Catch::Matchers::WithinAbs(b2[i], epsilon));
-    }
+    validate(p0, p1, p2, [](const auto&...) { return true; });
 }
 
-static_assert((10 - (10.f / 3.f) * 3.0) > 0);
+void validate(const auto p0, const auto p1, const auto p2, const auto predicate)
+{
+    vector<barycentric_coordinate<2, float, int>> out1;
+    decltype(out1) out2;
+
+    trivial_raster_triangle<>(array{p0, p1, p2}, back_inserter(out1), predicate);
+    integral_incremental_raster_triangle<>(
+        array{p0, p1, p2},
+        back_inserter(out2),
+        predicate
+
+    );
+
+    for(const auto [b1, b2] : views::zip(out1, out2))
+    {
+        REQUIRE(b1.point == b2.point);
+
+        for(auto i = 0; i < 3; ++i) REQUIRE(b1.coordinate[i] == b2.coordinate[i]);
+    }
+
+    REQUIRE(out1.size() == out2.size());
+}
+
+SCENARIO("raster triangle", "[raster_triangle]")
+{
+    constexpr auto size = 100;
+
+    const auto [p0, p1, p2] = GENERATE(take(size, Catch::random_triangle(-100, 100)));
+
+    GIVEN(format("triangle p0 = {}, p1 = {}, p2 = {}", p0, p1, p2))
+    {
+        WHEN("rasterize it") { validate(p0, p1, p2); }
+
+        AND_WHEN("with predicate")
+        {
+            constexpr ivec2 window_max{size / 2};
+            validate(p0, p1, p2, raster_triangle_windowed_predicate<int>{-window_max, window_max});
+        }
+    }
+}
