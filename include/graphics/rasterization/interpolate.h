@@ -1,10 +1,6 @@
 #pragma once
 
-#include <ranges>
-
-#include <stdsharp/cassert/cassert.h>
-
-#include "../namespace_alias.h"
+#include "raster_triangle.h"
 
 namespace graphics::rasterization
 {
@@ -14,28 +10,26 @@ namespace graphics::rasterization
             typename T,
             glm::qualifier Q,
             glm::length_t L,
-            std::ranges::input_range InterpolateIn,
+            std::ranges::input_range InCoord,
             typename OutIt>
         constexpr auto operator()(
-            const glm::vec<L, T, Q> s0,
-            decltype(s0) s1,
-            const glm::mat<L + 1, L + 1, T, Q> trans,
-            InterpolateIn&& interpolate_in,
+            const std::array<glm::vec<3, T, Q>, 3> src_triangle,
+            decltype(src_triangle) dst_triangle,
+            InCoord&& coord,
             OutIt out_it
         ) const
-            requires requires(std::remove_const_t<std::iter_value_t<InterpolateIn>> out_v) {
-                requires star::explicitly_convertible<T, decltype(out_v)>;
-                requires std::output_iterator<OutIt, decltype(out_v)>;
-                requires star::arithmetic_like<decltype(out_v)>;
+            requires requires(
+                std::remove_const_t<std::iter_value_t<InCoord>> coord,
+                decltype(coord)::out_vec_t::value_type out_t,
+                barycentric_coordinate<3, decltype(out_t), T> barycentric
+            ) {
+                requires std::same_as<decltype(coord), decltype(barycentric)>;
+                requires std::output_iterator<OutIt, decltype(barycentric)>;
             }
         {
             using vec_t = glm::vec<L, T, Q>;
-            using out_t = std::remove_const_t<std::iter_value_t<InterpolateIn>>;
+            using out_t = std::remove_const_t<std::iter_value_t<InCoord>>;
 
-            Expects(s0 != s1);
-
-            const vec_t d0{trans * s0};
-            const vec_t d1{trans * s1};
 
             {
                 constexpr glm::vec<L, T, Q> zero_vec{0};

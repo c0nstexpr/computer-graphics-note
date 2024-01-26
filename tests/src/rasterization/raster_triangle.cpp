@@ -21,7 +21,6 @@ void validate(const auto p0, const auto p1, const auto p2, const auto predicate)
         array{p0, p1, p2},
         back_inserter(out2),
         predicate
-
     );
 
     for(const auto [b1, b2] : views::zip(out1, out2))
