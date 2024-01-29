@@ -16,7 +16,8 @@ set(src
     src/rasterization/cohen_sutherland_clipping.cpp
     src/rasterization/midpoint_clipping.cpp
     src/rasterization/liang_barsky_clipping.cpp
-    src/rasterization/raster_triangle.cpp)
+    src/rasterization/raster_triangle.cpp
+    src/rasterization/perspective_interpolate.cpp)
 
 config_lib(${PROJECT_NAME}Lib INTERFACE)
 
