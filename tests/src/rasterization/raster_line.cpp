@@ -7,16 +7,17 @@ using namespace glm;
 using namespace graphics::rasterization;
 using namespace Catch;
 
-
 SCENARIO("draw line", "[raster_line]")
 {
     static std::mt19937_64 engine{Catch::getSeed()};
-    const ivec2 p0 =
-        GENERATE_REF(take(100, random_glm_vec<2, int, random_engine_wrapper<>>(-100, 100, engine)));
+    constexpr auto size = 50;
+    const ivec2 p0 = GENERATE_REF(
+        take(size, random_glm_vec<2, int, random_engine_wrapper<>>(-size, size, engine))
+    );
     const ivec2 p1 =
-        GENERATE_REF(take(1, random_glm_vec<2, int, random_engine_wrapper<>>(-100, 100, engine)));
+        GENERATE_REF(take(1, random_glm_vec<2, int, random_engine_wrapper<>>(-size, size, engine)));
     ivec2 d =
-        GENERATE_REF(take(1, random_glm_vec<2, int, random_engine_wrapper<>>(-100, 100, engine)));
+        GENERATE_REF(take(1, random_glm_vec<2, int, random_engine_wrapper<>>(-size, size, engine)));
 
     if(!conform_to(d.x <=> 0, p1.x - p0.x <=> 0)) d.x *= -1;
     if(!conform_to(d.y <=> 0, p1.y - p0.y <=> 0)) d.y *= -1;

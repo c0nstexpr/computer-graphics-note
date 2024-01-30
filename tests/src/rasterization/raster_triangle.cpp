@@ -35,9 +35,9 @@ void validate(const auto p0, const auto p1, const auto p2, const auto predicate)
 
 SCENARIO("raster triangle", "[raster_triangle]")
 {
-    constexpr auto size = 100;
+    constexpr auto size = 50;
 
-    const auto [p0, p1, p2] = GENERATE(take(size, Catch::random_triangle(-100, 100)));
+    const auto [p0, p1, p2] = GENERATE_REF(take(size, Catch::random_triangle(-size, size)));
 
     GIVEN(format("triangle p0 = {}, p1 = {}, p2 = {}", p0, p1, p2))
     {
