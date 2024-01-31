@@ -5,6 +5,7 @@
 
 #include <cxxopts.hpp>
 
+#include "rasterization/perspective_interpolate.h"
 #include "rasterization/raster_line.h"
 #include "rasterization/raster_triangle.h"
 
@@ -15,8 +16,6 @@ using namespace ankerl::nanobench;
 using namespace templates;
 using namespace cxxopts;
 using namespace graphics::benchmark;
-
-using bench_config = ankerl::nanobench::Config;
 
 namespace
 {
@@ -103,7 +102,7 @@ namespace
                         values: [
                             ["Name"],
                             ["Total(s)"],
-                            ["Average(ms)"],
+                            ["Average(μs)"],
                             ["Median Absolute Percent Error"]
                         ],
                         align: "center"
@@ -113,7 +112,7 @@ namespace
                         values: [
                             [{{#result}}'{{name}}',{{/result}}],
                             [{{#result}}{{sumProduct(iterations, elapsed)}},{{/result}}],
-                            [{{#result}}{{average(elapsed)}} * 1000,{{/result}}],
+                            [{{#result}}{{average(elapsed)}} * 1000 * 1000,{{/result}}],
                             [{{#result}}{{medianAbsolutePercentError(elapsed)}},{{/result}}],
                             [{{#result}}{{context(relative)}},{{/result}}]
                         ]
@@ -150,10 +149,9 @@ namespace
 
         if(constexpr auto elapsed_enum = Result::Measure::elapsed; b.relative())
             for(const auto baseline = results[0].average(elapsed_enum); auto& r : results)
-            { // NOLINTNEXTLINE(*-const-cast)
-                auto& context = const_cast<unordered_map<string, string>&>(r.config().mContext);
-                context["relative"] = to_string(baseline / r.average(elapsed_enum));
-            }
+                // NOLINTNEXTLINE(*-const-cast)
+                const_cast<unordered_map<string, string>&>(r.config().mContext)["relative"] =
+                    to_string(baseline / r.average(elapsed_enum));
 
         render_fs.exceptions(ofstream::failbit | ofstream::badbit);
         println("output benchmark rendered result to path {}", render_html_path.c_str());
@@ -163,12 +161,13 @@ namespace
 
 int main(int argc, char* const argv[])
 {
+    constexpr auto output_arg = "output";
     constexpr auto epoch_arg = "epoch";
     constexpr auto min_epoch_time_arg = "min-epoch-time";
     Options options{"Graphics Library Benchmark", "Run benchmark for graphics library"};
 
     options.add_options() //
-        ("o,output",
+        ("o,"s + output_arg,
          "Report file directory for results",
          value<path>()->default_value("./")) //
         ("e,"s + epoch_arg,
@@ -182,13 +181,6 @@ int main(int argc, char* const argv[])
     try
     {
         const auto& result = options.parse(argc, argv);
-        const auto bench_fn =
-            [epoch = result[epoch_arg].as<unsigned>(),
-             min_epoch_time =
-                 chrono::milliseconds{result[min_epoch_time_arg].as<unsigned>()}](Bench& b)
-        {
-            b.epochs(epoch).minEpochTime(min_epoch_time).warmup(10); //
-        };
 
         if(result.count("help") != 0)
         {
@@ -196,15 +188,25 @@ int main(int argc, char* const argv[])
             return 0;
         }
 
-        for( //
-            const auto& out_dir = result["output"].as<path>(); //
-            const auto& b :
-            {
-                raster_line(bench_fn),
-                raster_triangle(bench_fn) //
-            } //
-        )
-            output_to_file(out_dir, b);
+        const auto epoch = result[epoch_arg].as<unsigned>();
+        const chrono::milliseconds min_epoch_time{result[min_epoch_time_arg].as<unsigned>()};
+
+        const auto bench_fn = [&](Bench& b)
+        {
+            b.epochs(epoch).minEpochTime(min_epoch_time).warmup(10); //
+        };
+
+        ::ranges::tuple_for_each(
+            ::ranges::tuple_transform(
+                tuple{
+                    raster_line,
+                    raster_triangle,
+                    perspective_interpolate,
+                },
+                [&bench_fn](auto&& fn) { return fn(bench_fn); }
+            ),
+            [out_dir = result[output_arg].as<path>()](auto&& b) { output_to_file(out_dir, b); } //
+        );
     }
     catch(const exception& e)
     {

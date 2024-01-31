@@ -6,7 +6,7 @@
 
 namespace graphics::benchmark
 {
-    auto raster_triangle(std::invocable<ankerl::nanobench::Bench&> auto bench_fn = star::empty)
+    inline constexpr auto raster_triangle = [](std::invocable<ankerl::nanobench::Bench&> auto bench_fn = star::empty)
     {
         using namespace std;
         using namespace stdsharp;
@@ -14,7 +14,7 @@ namespace graphics::benchmark
         using namespace graphics::rasterization;
         using namespace ankerl::nanobench;
 
-        constexpr auto size = 100;
+        constexpr auto size = 50;
         constexpr f64vec2 window_max{size / static_cast<f64>(2)};
         constexpr i64vec2 p0{};
         constexpr i64vec2 p1{size, -size};
@@ -44,5 +44,5 @@ namespace graphics::benchmark
         doNotOptimizeAway(*out.begin());
 
         return b;
-    }
+    };
 }

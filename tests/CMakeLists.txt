@@ -52,30 +52,3 @@ if(${ENABLE_CLANG_TIDY})
 endif()
 
 catch_discover_tests(${PROJECT_NAME})
-
-#
-# Configure code coverage
-#
-set(CODE_COVERAGE_EXT CACHE STRING "Enable code coverage")
-
-if(CODE_COVERAGE_EXT)
-  set(PROFILE_FILE "${PROJECT_NAME}.profraw")
-
-  add_custom_command(
-    OUTPUT ${PROFILE_FILE}
-    DEPENDS ${PROJECT_NAME}
-    COMMAND ${CMAKE_COMMAND} -E rm -f ${PROFILE_FILE}
-    COMMAND ${CMAKE_COMMAND} -E env LLVM_PROFILE_FILE=${PROFILE_FILE}
-            $<TARGET_FILE:${PROJECT_NAME}> || exit 0 # Run first to generate
-                                                     # profraw file
-  )
-
-  target_coverage(
-    ${PROJECT_NAME}
-    FORMAT
-    ${CODE_COVERAGE_EXT}
-    DEPENDS
-    ${PROFILE_FILE}
-    PROFILE_FILE
-    ${PROFILE_FILE})
-endif()
