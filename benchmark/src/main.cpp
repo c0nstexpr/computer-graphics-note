@@ -5,6 +5,7 @@
 
 #include <cxxopts.hpp>
 
+#include "rasterization/clip.h"
 #include "rasterization/perspective_interpolate.h"
 #include "rasterization/raster_line.h"
 #include "rasterization/raster_triangle.h"
@@ -198,11 +199,7 @@ int main(int argc, char* const argv[])
 
         ::ranges::tuple_for_each(
             ::ranges::tuple_transform(
-                tuple{
-                    raster_line,
-                    raster_triangle,
-                    perspective_interpolate,
-                },
+                tuple{raster_line, raster_triangle, perspective_interpolate, clip},
                 [&bench_fn](auto&& fn) { return fn(bench_fn); }
             ),
             [out_dir = result[output_arg].as<path>()](auto&& b) { output_to_file(out_dir, b); } //

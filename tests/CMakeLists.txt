@@ -12,6 +12,7 @@ include(Catch)
 # Set the sources for the unit tests and add the executable(s)
 #
 set(src
+    src/rasterization/clip.cpp
     src/rasterization/raster_line.cpp
     src/rasterization/cohen_sutherland_clipping.cpp
     src/rasterization/midpoint_clipping.cpp
